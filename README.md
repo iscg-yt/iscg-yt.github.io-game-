@@ -1,4 +1,4 @@
-<!__DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -9,35 +9,32 @@
       margin: 0;
       overflow: hidden;
       background: linear-gradient(to top, green, white);
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      height: 100vh;
-      padding: 20px;
     }
     canvas {
       display: block;
-      margin-top: 30px;
+      margin: 0 auto;
       border: 5px solid black; /* 黑框描邊 */
     }
-    #score, #highScore {
+    #score, #highScore, #controls {
       position: absolute;
+      font-size: 18px;
       color: black;
-      font-size: 20px;
       font-family: Arial, sans-serif;
+      background: white;
+      padding: 5px;
+      border-radius: 5px;
     }
     #score {
-      top: 60px; /* 下移 */
-      right: 20px;
+      top: 10px;
+      right: 10px;
     }
     #highScore {
-      top: 60px; /* 下移 */
-      left: 20px;
+      top: 10px;
+      left: 10px;
     }
     #controls {
-      position: absolute;
-      top: 100px; /* 下移 */
-      right: 20px;
+      top: 40px;
+      right: 10px;
     }
     #gameOver {
       display: none;
@@ -72,8 +69,8 @@
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth - 40;
-    canvas.height = window.innerHeight - 120;
+    canvas.width = window.innerWidth - 20;
+    canvas.height = window.innerHeight - 20;
     let score = 0;
     let highScore = localStorage.getItem("highScore") || 0;
     let isGameOver = false;
@@ -81,14 +78,13 @@
     let soundEnabled = true;
     const wallSound = new Audio("https://www.soundjay.com/button/beep-07.wav");
     const paddleSound = new Audio("https://www.soundjay.com/glass/glass-break-1.wav");
-    const bounceSound = new Audio("https://www.soundjay.com/explosion/explosion-01.wav");
     const paddle = {
       width: 150,
       height: 30,
       x: canvas.width / 2 - 75,
       y: canvas.height - 60,
       color: "black",
-      speed: 15
+      speed: 10
     };
     const ball = {
       x: canvas.width / 2,
@@ -132,14 +128,14 @@
         ball.y + ball.radius >= paddle.y &&
         ball.x > paddle.x &&
         ball.x < paddle.x + paddle.width &&
-        ball.dy > 0 // 確保球是從上往下撞擊
+        ball.dy > 0
       ) {
         ball.dy *= -1;
-        ball.y = paddle.y - ball.radius; // 確保球不會卡住
+        ball.y = paddle.y - ball.radius; // 防止卡住
         score++;
         document.getElementById("score").innerText = "分數：" + score;
         if (soundEnabled) paddleSound.play();
-        // 每 5 分增加難度
+        // 每 5 分增加速度
         if (score % 5 === 0) {
           ball.dx *= 1.1;
           ball.dy *= 1.1;
@@ -164,6 +160,7 @@
       score = 0;
       isGameOver = false;
       document.getElementById("score").innerText = "分數：0";
+      // 重置球的速度
       ball.x = canvas.width / 2;
       ball.y = canvas.height / 2;
       ball.dx = ball.defaultSpeed;
@@ -173,9 +170,7 @@
     }
     document.getElementById("toggleSound").addEventListener("click", () => {
       soundEnabled = !soundEnabled;
-      document.getElementById("toggleSound").innerText = soundEnabled
-        ? "聲音：開"
-        : "聲音：關";
+      document.getElementById("toggleSound").innerText = soundEnabled ? "聲音：開" : "聲音：關";
     });
     function gameLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
