@@ -17,7 +17,7 @@
     }
     #score, #highScore {
       position: absolute;
-      color: white;
+      color: black;
       font-size: 24px;
       font-family: Arial, sans-serif;
     }
@@ -45,18 +45,18 @@
     document.getElementById("highScore").innerText = "High Score: " + highScore;
     const paddle = {
       width: 100,
-      height: 20,
+      height: 50,
       x: canvas.width / 2 - 50,
       y: canvas.height - 30,
       color: "white",
-      speed: 10
+      speed: 15
     };
     const ball = {
       x: canvas.width / 2,
       y: canvas.height / 2,
       radius: 10,
-      dx: 3,
-      dy: 3,
+      dx: 5,
+      dy: 5,
       color: "red"
     };
     const bounceSound = new Audio("https://www.fesliyanstudios.com/play-mp3/387");
@@ -103,10 +103,10 @@
         score++;
         document.getElementById("score").innerText = "Score: " + score;
         bounceSound.play();
-        // 每 10 分增加難度
-        if (score % 10 === 0) {
-          ball.dx *= 1.1;
-          ball.dy *= 1.1;
+        // 每 5 分增加難度
+        if (score % 5 === 0) {
+          ball.dx *= 1.2;
+          ball.dy *= 1.2;
         }
       }
     }
