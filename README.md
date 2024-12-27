@@ -1,4 +1,3 @@
-# iscg-yt.github.io-game-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,10 +14,10 @@
       display: block;
       background: #282c34;
     }
-    #score, #highScore {
+    #score, #highScore, #controls {
       position: absolute;
-      color: black;
-      font-size: 24px;
+      color: white;
+      font-size: 20px;
       font-family: Arial, sans-serif;
     }
     #score {
@@ -29,11 +28,39 @@
       top: 10px;
       left: 10px;
     }
+    #controls {
+      top: 50px;
+      left: 10px;
+    }
+    #gameOver {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      text-align: center;
+      font-size: 24px;
+      font-family: Arial, sans-serif;
+    }
+    #gameOver button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+    }
   </style>
 </head>
 <body>
   <div id="score">Score: 0</div>
   <div id="highScore">High Score: 0</div>
+  <div id="controls">
+    <button id="toggleSound">Toggle Sound</button>
+  </div>
+  <div id="gameOver">
+    <p>Game Over!</p>
+    <p>Your Score: <span id="finalScore">0</span></p>
+    <button onclick="restartGame()">Restart</button>
+  </div>
   <canvas id="gameCanvas"></canvas>
   <script>
     const canvas = document.getElementById("gameCanvas");
@@ -43,11 +70,13 @@
     let score = 0;
     let highScore = localStorage.getItem("highScore") || 0;
     document.getElementById("highScore").innerText = "High Score: " + highScore;
+    let soundEnabled = true;
+    const bounceSound = new Audio("https://www.fesliyanstudios.com/play-mp3/387");
     const paddle = {
-      width: 100,
-      height: 50,
-      x: canvas.width / 2 - 50,
-      y: canvas.height - 30,
+      width: 120,
+      height: 20,
+      x: canvas.width / 2 - 60,
+      y: canvas.height - 40,
       color: "white",
       speed: 15
     };
@@ -59,7 +88,6 @@
       dy: 5,
       color: "red"
     };
-    const bounceSound = new Audio("https://www.fesliyanstudios.com/play-mp3/387");
     function drawPaddle() {
       ctx.fillStyle = paddle.color;
       ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
@@ -77,21 +105,15 @@
       // 邊界反彈
       if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
         ball.dx *= -1;
-        bounceSound.play();
+        if (soundEnabled) bounceSound.play();
       }
       if (ball.y - ball.radius < 0) {
         ball.dy *= -1;
-        bounceSound.play();
+        if (soundEnabled) bounceSound.play();
       }
       // 碰到底部
       if (ball.y + ball.radius > canvas.height) {
-        if (score > highScore) {
-          highScore = score;
-          localStorage.setItem("highScore", highScore);
-          document.getElementById("highScore").innerText = "High Score: " + highScore;
-        }
-        alert("遊戲結束！最終得分：" + score);
-        document.location.reload();
+        endGame();
       }
       // 碰到盤子
       if (
@@ -102,7 +124,7 @@
         ball.dy *= -1;
         score++;
         document.getElementById("score").innerText = "Score: " + score;
-        bounceSound.play();
+        if (soundEnabled) bounceSound.play();
         // 每 5 分增加難度
         if (score % 5 === 0) {
           ball.dx *= 1.2;
@@ -114,6 +136,32 @@
       const touchX = e.touches ? e.touches[0].clientX : e.clientX;
       paddle.x = Math.max(0, Math.min(touchX - paddle.width / 2, canvas.width - paddle.width));
     }
+    function endGame() {
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem("highScore", highScore);
+        document.getElementById("highScore").innerText = "High Score: " + highScore;
+      }
+      document.getElementById("finalScore").innerText = score;
+      document.getElementById("gameOver").style.display = "block";
+      cancelAnimationFrame(gameLoop);
+    }
+    function restartGame() {
+      score = 0;
+      document.getElementById("score").innerText = "Score: 0";
+      ball.x = canvas.width / 2;
+      ball.y = canvas.height / 2;
+      ball.dx = 5;
+      ball.dy = 5;
+      document.getElementById("gameOver").style.display = "none";
+      gameLoop();
+    }
+    document.getElementById("toggleSound").addEventListener("click", () => {
+      soundEnabled = !soundEnabled;
+      document.getElementById("toggleSound").innerText = soundEnabled
+        ? "Sound: ON"
+        : "Sound: OFF";
+    });
     function gameLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawPaddle();
@@ -121,10 +169,9 @@
       updateBall();
       requestAnimationFrame(gameLoop);
     }
-    // 初始化
-    gameLoop();
     canvas.addEventListener("mousemove", (e) => updatePaddle(e));
     canvas.addEventListener("touchmove", (e) => updatePaddle(e));
+    gameLoop();
   </script>
 </body>
 </html>
