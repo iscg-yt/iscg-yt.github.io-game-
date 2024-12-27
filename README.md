@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!__DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
@@ -18,6 +18,7 @@
     canvas {
       display: block;
       margin-top: 30px;
+      border: 5px solid black; /* 黑框描邊 */
     }
     #score, #highScore {
       position: absolute;
@@ -26,17 +27,17 @@
       font-family: Arial, sans-serif;
     }
     #score {
-      top: 10px;
-      right: 10px;
+      top: 60px; /* 下移 */
+      right: 20px;
     }
     #highScore {
-      top: 10px;
-      left: 10px;
+      top: 60px; /* 下移 */
+      left: 20px;
     }
     #controls {
       position: absolute;
-      top: 40px;
-      right: 10px;
+      top: 100px; /* 下移 */
+      right: 20px;
     }
     #gameOver {
       display: none;
@@ -72,7 +73,7 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     canvas.width = window.innerWidth - 40;
-    canvas.height = window.innerHeight - 100;
+    canvas.height = window.innerHeight - 120;
     let score = 0;
     let highScore = localStorage.getItem("highScore") || 0;
     let isGameOver = false;
@@ -170,7 +171,7 @@
       document.getElementById("gameOver").style.display = "none";
       gameLoop();
     }
-document.getElementById("toggleSound").addEventListener("click", () => {
+    document.getElementById("toggleSound").addEventListener("click", () => {
       soundEnabled = !soundEnabled;
       document.getElementById("toggleSound").innerText = soundEnabled
         ? "聲音：開"
