@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,12 +9,18 @@
       margin: 0;
       overflow: hidden;
       background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100vh;
+      padding: 20px;
     }
     canvas {
       display: block;
       background: #282c34;
+      margin-top: 30px;
     }
-    #score, #highScore, #controls {
+    #score, #highScore {
       position: absolute;
       color: black;
       font-size: 20px;
@@ -22,15 +28,19 @@
     }
     #score {
       top: 10px;
-      right: 10px;
+      left: 50%;
+      transform: translateX(-50%);
     }
     #highScore {
-      top: 10px;
-      left: 10px;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
     }
     #controls {
-      top: 50px;
-      left: 10px;
+      position: absolute;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
     }
     #gameOver {
       display: none;
@@ -51,26 +61,26 @@
   </style>
 </head>
 <body>
-  <div id="score">Score: 0</div>
-  <div id="highScore">High Score: 0</div>
+  <div id="score">分數：0</div>
+  <div id="highScore">最高分：0</div>
   <div id="controls">
-    <button id="toggleSound">Toggle Sound</button>
+    <button id="toggleSound">開關聲音</button>
   </div>
   <div id="gameOver">
-    <p>Game Over!</p>
-    <p>Your Score: <span id="finalScore">0</span></p>
-    <button onclick="restartGame()">Restart</button>
+    <p>遊戲結束！</p>
+    <p>你的分數：<span id="finalScore">0</span></p>
+    <button onclick="restartGame()">重新開始</button>
   </div>
   <canvas id="gameCanvas"></canvas>
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth - 40; // 左右各留 20px 邊距
+    canvas.height = window.innerHeight - 100; // 調整高度，增加底部空間
     let score = 0;
     let highScore = localStorage.getItem("highScore") || 0;
     let isGameOver = false; // 用於判斷遊戲狀態
-    document.getElementById("highScore").innerText = "High Score: " + highScore;
+    document.getElementById("highScore").innerText = "最高分：" + highScore;
     let soundEnabled = true;
     const bounceSound = new Audio("https://www.fesliyanstudios.com/play-mp3/387");
     const paddle = {
@@ -125,7 +135,7 @@
       ) {
         ball.dy *= -1;
         score++;
-        document.getElementById("score").innerText = "Score: " + score;
+        document.getElementById("score").innerText = "分數：" + score;
         if (soundEnabled) bounceSound.play();
         // 每 5 分增加難度
         if (score % 5 === 0) {
@@ -143,7 +153,7 @@
       if (score > highScore) {
         highScore = score;
         localStorage.setItem("highScore", highScore);
-        document.getElementById("highScore").innerText = "High Score: " + highScore;
+        document.getElementById("highScore").innerText = "最高分：" + highScore;
       }
       document.getElementById("finalScore").innerText = score;
       document.getElementById("gameOver").style.display = "block";
@@ -151,7 +161,7 @@
     function restartGame() {
       score = 0;
       isGameOver = false;
-      document.getElementById("score").innerText = "Score: 0";
+      document.getElementById("score").innerText = "分數：0";
       ball.x = canvas.width / 2;
       ball.y = canvas.height / 2;
       ball.dx = 5;
@@ -162,8 +172,8 @@
 document.getElementById("toggleSound").addEventListener("click", () => {
       soundEnabled = !soundEnabled;
       document.getElementById("toggleSound").innerText = soundEnabled
-        ? "Sound: ON"
-        : "Sound: OFF";
+        ? "聲音：開"
+        : "聲音：關";
     });
     function gameLoop() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
