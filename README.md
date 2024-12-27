@@ -16,7 +16,7 @@
     }
     #score, #highScore, #controls {
       position: absolute;
-      color: white;
+      color: black;
       font-size: 20px;
       font-family: Arial, sans-serif;
     }
@@ -38,7 +38,7 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      color: white;
+      color: black;
       text-align: center;
       font-size: 24px;
       font-family: Arial, sans-serif;
@@ -69,14 +69,15 @@
     canvas.height = window.innerHeight;
     let score = 0;
     let highScore = localStorage.getItem("highScore") || 0;
+    let isGameOver = false; // 用於判斷遊戲狀態
     document.getElementById("highScore").innerText = "High Score: " + highScore;
     let soundEnabled = true;
     const bounceSound = new Audio("https://www.fesliyanstudios.com/play-mp3/387");
     const paddle = {
-      width: 120,
-      height: 20,
-      x: canvas.width / 2 - 60,
-      y: canvas.height - 40,
+      width: 150,
+      height: 30, // 增加高度
+      x: canvas.width / 2 - 75,
+      y: canvas.height - 60, // 提高盤子位置
       color: "white",
       speed: 15
     };
@@ -84,8 +85,8 @@
       x: canvas.width / 2,
       y: canvas.height / 2,
       radius: 10,
-      dx: 5,
-      dy: 5,
+      dx: 4,
+      dy: 4,
       color: "red"
     };
     function drawPaddle() {
@@ -100,6 +101,7 @@
       ctx.closePath();
     }
     function updateBall() {
+      if (isGameOver) return; // 如果遊戲結束，不再更新球的位置
       ball.x += ball.dx;
       ball.y += ball.dy;
       // 邊界反彈
@@ -127,8 +129,8 @@
         if (soundEnabled) bounceSound.play();
         // 每 5 分增加難度
         if (score % 5 === 0) {
-          ball.dx *= 1.2;
-          ball.dy *= 1.2;
+          ball.dx *= 1.1;
+          ball.dy *= 1.1;
         }
       }
     }
@@ -137,6 +139,7 @@
       paddle.x = Math.max(0, Math.min(touchX - paddle.width / 2, canvas.width - paddle.width));
     }
     function endGame() {
+      isGameOver = true; // 設定遊戲結束狀態
       if (score > highScore) {
         highScore = score;
         localStorage.setItem("highScore", highScore);
@@ -144,10 +147,10 @@
       }
       document.getElementById("finalScore").innerText = score;
       document.getElementById("gameOver").style.display = "block";
-      cancelAnimationFrame(gameLoop);
     }
     function restartGame() {
       score = 0;
+      isGameOver = false;
       document.getElementById("score").innerText = "Score: 0";
       ball.x = canvas.width / 2;
       ball.y = canvas.height / 2;
@@ -156,7 +159,7 @@
       document.getElementById("gameOver").style.display = "none";
       gameLoop();
     }
-    document.getElementById("toggleSound").addEventListener("click", () => {
+document.getElementById("toggleSound").addEventListener("click", () => {
       soundEnabled = !soundEnabled;
       document.getElementById("toggleSound").innerText = soundEnabled
         ? "Sound: ON"
