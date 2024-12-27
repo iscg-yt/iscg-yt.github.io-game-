@@ -8,7 +8,7 @@
     body {
       margin: 0;
       overflow: hidden;
-      background: #f0f0f0;
+      background: linear-gradient(to top, green, white);
       display: flex;
       justify-content: center;
       align-items: flex-start;
@@ -17,7 +17,6 @@
     }
     canvas {
       display: block;
-      background: #282c34;
       margin-top: 30px;
     }
     #score, #highScore {
@@ -28,19 +27,16 @@
     }
     #score {
       top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
+      right: 10px;
     }
     #highScore {
-      top: 40px;
-      left: 50%;
-      transform: translateX(-50%);
+      top: 10px;
+      left: 10px;
     }
     #controls {
       position: absolute;
-      top: 70px;
-      left: 50%;
-      transform: translateX(-50%);
+      top: 40px;
+      right: 10px;
     }
     #gameOver {
       display: none;
@@ -75,29 +71,32 @@
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth - 40; // 左右各留 20px 邊距
-    canvas.height = window.innerHeight - 100; // 調整高度，增加底部空間
+    canvas.width = window.innerWidth - 40;
+    canvas.height = window.innerHeight - 100;
     let score = 0;
     let highScore = localStorage.getItem("highScore") || 0;
-    let isGameOver = false; // 用於判斷遊戲狀態
+    let isGameOver = false;
     document.getElementById("highScore").innerText = "最高分：" + highScore;
     let soundEnabled = true;
-    const bounceSound = new Audio("https://www.fesliyanstudios.com/play-mp3/387");
+    const wallSound = new Audio("https://www.soundjay.com/button/beep-07.wav");
+    const paddleSound = new Audio("https://www.soundjay.com/glass/glass-break-1.wav");
+    const bounceSound = new Audio("https://www.soundjay.com/explosion/explosion-01.wav");
     const paddle = {
       width: 150,
-      height: 30, // 增加高度
+      height: 30,
       x: canvas.width / 2 - 75,
-      y: canvas.height - 60, // 提高盤子位置
-      color: "white",
+      y: canvas.height - 60,
+      color: "black",
       speed: 15
     };
     const ball = {
       x: canvas.width / 2,
       y: canvas.height / 2,
       radius: 10,
-      dx: 4,
-      dy: 4,
-      color: "red"
+      dx: 5,
+      dy: 5,
+      color: "red",
+      defaultSpeed: 5
     };
     function drawPaddle() {
       ctx.fillStyle = paddle.color;
@@ -111,17 +110,17 @@
       ctx.closePath();
     }
     function updateBall() {
-      if (isGameOver) return; // 如果遊戲結束，不再更新球的位置
+      if (isGameOver) return;
       ball.x += ball.dx;
       ball.y += ball.dy;
       // 邊界反彈
       if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
         ball.dx *= -1;
-        if (soundEnabled) bounceSound.play();
+        if (soundEnabled) wallSound.play();
       }
       if (ball.y - ball.radius < 0) {
         ball.dy *= -1;
-        if (soundEnabled) bounceSound.play();
+        if (soundEnabled) wallSound.play();
       }
       // 碰到底部
       if (ball.y + ball.radius > canvas.height) {
@@ -129,14 +128,16 @@
       }
       // 碰到盤子
       if (
-        ball.y + ball.radius > paddle.y &&
+        ball.y + ball.radius >= paddle.y &&
         ball.x > paddle.x &&
-        ball.x < paddle.x + paddle.width
+        ball.x < paddle.x + paddle.width &&
+        ball.dy > 0 // 確保球是從上往下撞擊
       ) {
         ball.dy *= -1;
+        ball.y = paddle.y - ball.radius; // 確保球不會卡住
         score++;
         document.getElementById("score").innerText = "分數：" + score;
-        if (soundEnabled) bounceSound.play();
+        if (soundEnabled) paddleSound.play();
         // 每 5 分增加難度
         if (score % 5 === 0) {
           ball.dx *= 1.1;
@@ -149,7 +150,7 @@
       paddle.x = Math.max(0, Math.min(touchX - paddle.width / 2, canvas.width - paddle.width));
     }
     function endGame() {
-      isGameOver = true; // 設定遊戲結束狀態
+      isGameOver = true;
       if (score > highScore) {
         highScore = score;
         localStorage.setItem("highScore", highScore);
@@ -164,8 +165,8 @@
       document.getElementById("score").innerText = "分數：0";
       ball.x = canvas.width / 2;
       ball.y = canvas.height / 2;
-      ball.dx = 5;
-      ball.dy = 5;
+      ball.dx = ball.defaultSpeed;
+      ball.dy = ball.defaultSpeed;
       document.getElementById("gameOver").style.display = "none";
       gameLoop();
     }
