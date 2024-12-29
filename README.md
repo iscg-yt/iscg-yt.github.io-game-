@@ -1,184 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>接球遊戲</title>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: #f0f0f0;
-    }
-    canvas {
-      display: block;
-      background: #282c34;
-    }
-    #score, #highScore, #controls {
-      position: absolute;
-      color: black;
-      font-size: 20px;
-      font-family: Arial, sans-serif;
-    }
-    #score {
-      top: 10px;
-      right: 10px;
-    }
-    #highScore {
-      top: 10px;
-      left: 10px;
-    }
-    #controls {
-      top: 50px;
-      left: 10px;
-    }
-    #gameOver {
-      display: none;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: black;
-      text-align: center;
-      font-size: 24px;
-      font-family: Arial, sans-serif;
-    }
-    #gameOver button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 18px;
-    }
-  </style>
-</head>
-<body>
-  <div id="score">Score: 0</div>
-  <div id="highScore">High Score: 0</div>
-  <div id="controls">
-    <button id="toggleSound">Toggle Sound</button>
-  </div>
-  <div id="gameOver">
-    <p>Game Over!</p>
-    <p>Your Score: <span id="finalScore">0</span></p>
-    <button onclick="restartGame()">Restart</button>
-  </div>
-  <canvas id="gameCanvas"></canvas>
-  <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    let score = 0;
-    let highScore = localStorage.getItem("highScore") || 0;
-    let isGameOver = false; // 用於判斷遊戲狀態
-    document.getElementById("highScore").innerText = "High Score: " + highScore;
-    let soundEnabled = true;
-    const bounceSound = new Audio("https://www.fesliyanstudios.com/play-mp3/387")
-    const paddle = {
-      width: 150,
-      height: 30, // 增加高度
-      x: canvas.width / 2 - 75,
-      y: canvas.height - 60, // 提高盤子位置
-      color: "white",
-      speed: 15
-    };
-    const initialBallSpeed = 5; // 初始速度值
-    const ball = {
-      x: canvas.width / 2,
-      y: canvas.height / 2,
-      radius: 10,
-      dx: initialBallSpeed,
-      dy: initialBallSpeed,
-      color: "red"
-    };
-    function resetBall() {
-      ball.x = canvas.width / 2;
-      ball.y = canvas.height / 2;
-      ball.dx = initialBallSpeed;
-      ball.dy = initialBallSpeed;
-    }
-    function drawPaddle() {
-      ctx.fillStyle = paddle.color;
-      ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
-    }
-    function drawBall() {
-      ctx.beginPath();
-      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-      ctx.fillStyle = ball.color;
-      ctx.fill();
-      ctx.closePath();
-    }
-    function updateBall() {
-      if (isGameOver) return; // 如果遊戲結束，不再更新球的位置
-      ball.x += ball.dx;
-      ball.y += ball.dy;
-      // 邊界反彈
-      if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
-        ball.dx *= -1;
-        if (soundEnabled) bounceSound.play();
-      }
-      if (ball.y - ball.radius < 0) {
-        ball.dy *= -1;
-        if (soundEnabled) bounceSound.play();
-      }
-      // 碰到底部
-      if (ball.y + ball.radius > canvas.height) {
-        endGame();
-      }
-      // 碰到盤子
-      if (
-        ball.y + ball.radius > paddle.y &&
-        ball.x > paddle.x &&
-        ball.x < paddle.x + paddle.width
-      ) {
-        ball.dy *= -1;
-        score++;
-        document.getElementById("score").innerText = "Score: " + score;
-        if (soundEnabled) bounceSound.play();
-        // 每 5 分增加難度
-        if (score % 5 === 0) {
-          ball.dx *= 1.2;
-          ball.dy *= 1.2;
-        }
-      }
-    }
-    function updatePaddle(e) {
-      const touchX = e.touches ? e.touches[0].clientX : e.clientX;
-      paddle.x = Math.max(0, Math.min(touchX - paddle.width / 2, canvas.width - paddle.width));
-    }
-    function endGame() {
-      isGameOver = true; // 設定遊戲結束狀態
-      if (score > highScore) {
-        highScore = score;
-        localStorage.setItem("highScore", highScore);
-        document.getElementById("highScore").innerText = "High Score: " + highScore;
-      }
-      document.getElementById("finalScore").innerText = score;
-      document.getElementById("gameOver").style.display = "block";
-    }
-    function restartGame() {
-      score = 0;
-      isGameOver = false;
-      document.getElementById("score").innerText = "Score: 0";
-      resetBall(); // 重置球的位置與速度
-  document.getElementById("gameOver").style.display = "none";
-      gameLoop();
-    }
-document.getElementById("toggleSound").addEventListener("click", () => {
-      soundEnabled = !soundEnabled;
-      document.getElementById("toggleSound").innerText = soundEnabled
-        ? "Sound: ON"
-        : "Sound: OFF";
-    });
-    function gameLoop() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawPaddle();
-      drawBall();
-      updateBall();
-      requestAnimationFrame(gameLoop);
-    }
-    canvas.addEventListener("mousemove", (e) => updatePaddle(e));
-    canvas.addEventListener("touchmove", (e) => updatePaddle(e));
-    gameLoop();
-  </script>
-</body>
-</html>
+import pygame
+import sys
+
+# 初始化 Pygame
+pygame.init()
+
+# 視窗設定
+screen_width, screen_height = 1080, 2400
+screen = pygame.display.set_mode((screen_width, screen_height))
+pygame.display.set_caption("自訂圖片與全域拖曳")
+
+# 顏色設定
+WHITE = (255, 255, 255)
+
+# 載入自訂圖片
+player_image = pygame.image.load("IMG_20240607_182905_800.jpg")  # 替換為你的圖片路徑
+player_image = pygame.transform.scale(player_image, (50, 50))  # 縮放圖片為 50x50 大小
+player_size = 50  # 圖片大小
+player_x = screen_width // 2  # 初始 X 座標
+player_y = screen_height // 2  # 初始 Y 座標
+
+# 拖曳狀態
+dragging = False
+
+# 遊戲主循環
+clock = pygame.time.Clock()
+
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        # 滑鼠按下：無論點擊哪裡都啟動拖曳
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            dragging = True  # 開始拖曳
+        # 滑鼠移動：拖曳中時更新方塊位置
+        if event.type == pygame.MOUSEMOTION and dragging:
+            mouse_x, mouse_y = event.pos
+            player_x = mouse_x - player_size // 2  # 更新方塊 X 座標
+            player_y = mouse_y - player_size // 2  # 更新方塊 Y 座標
+        # 滑鼠釋放：結束拖曳
+        if event.type == pygame.MOUSEBUTTONUP:
+            dragging = False  # 停止拖曳
+    # 邊界檢查
+    player_x = max(0, min(screen_width - player_size, player_x))
+    player_y = max(0, min(screen_height - player_size, player_y))
+    # 畫面更新
+    screen.fill(WHITE)  # 清空畫面
+    screen.blit(player_image, (player_x, player_y))  # 繪製自訂圖片
+    pygame.display.flip()  # 更新畫面
+    # 控制遊戲速度
+    clock.tick(30)
